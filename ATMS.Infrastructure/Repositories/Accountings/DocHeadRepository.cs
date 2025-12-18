@@ -24,4 +24,11 @@ public class DocHeadRepository : IDocHeadRepository
 
         return model.Id;
     }
+
+    public async Task<IReadOnlyList<DocHead>> GetListAsync(CancellationToken cancellationToken)
+    {
+        await using var context = await _dbContext.CreateDbContextAsync();
+        var list = await context.DocHeads.ToListAsync();
+        return list;
+    }
 }
