@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/shared/">
+    <Project Path="ATMS.Shared/ATMS.Shared.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="ATMS.ApplicationService/ATMS.ApplicationService.csproj" />
+    <Project Path="ATMS.Domain/ATMS.Domain.csproj" />
+    <Project Path="ATMS.Infrastructure/ATMS.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="ATMS.UnitTest/ATMS.UnitTest.csproj" Id="9dbbd2fc-1f36-4baa-80d6-264e5da4eed6" />
+  </Folder>
+  <Folder Name="/ui/">
+    <Project Path="ATMS.UI/ATMS.UI.csproj" />
+  </Folder>
+</Solution>
