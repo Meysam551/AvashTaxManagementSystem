@@ -1,0 +1,181 @@
+﻿@page "/documents/create"
+@rendermode RenderMode.InteractiveServer
+@* @attribute [Authorize] *@
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+@inject ILogger<CreateDocumentCover> Logger
+
+<h3>ثبت سند جدید</h3>
+
+@if (_isLoading)
+{
+    <div class="text-center my-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">در حال بارگذاری...</span>
+        </div>
+    </div>
+}
+else
+{
+    <EditForm Model="_model"
+              OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="alert alert-danger" />
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label class="form-label">تاریخ سند *</label>
+                    <InputDate @bind-Value="_model.DocumentDate"
+                               class="form-control"
+                               max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <ValidationMessage For="@(() => _model.DocumentDate)" />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label class="form-label">سال مالی *</label>
+                    <InputNumber @bind-Value="_model.FiscalYear"
+                                 class="form-control"
+                                 min="1400"
+                                 max="2030" />
+                    <ValidationMessage For="@(() => _model.FiscalYear)" />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label class="form-label">نوع سند *</label>
+                    <InputSelect @bind-Value="_model.DocumentType"
+                                 class="form-select">
+                        <option value="">-- انتخاب کنید --</option>
+                        @foreach (DocumentTypeEnum type in Enum.GetValues(typeof(DocumentTypeEnum)))
+                        {
+                            <option value="@type">@type.GetDisplayName()</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => _model.DocumentType)" />
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">شرح سند *</label>
+            <InputTextArea @bind-Value="_model.Description"
+                           class="form-control"
+                           rows="3"
+                           placeholder="شرح مختصر سند..." />
+            <ValidationMessage For="@(() => _model.Description)" />
+        </div>
+
+        <div class="alert alert-info">
+            <small>
+                <strong>راهنما:</strong><br />
+                @if (_model.DocumentType.HasValue)
+                {
+                    var selectedType = (DocumentTypeEnum)_model.DocumentType.Value;
+                    @selectedType.GetDescription()
+                }
+                else
+                {
+                    <text>یک نوع سند انتخاب کنید تا راهنمای آن نمایش داده شود.</text>
+                }
+            </small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit"
+                    class="btn btn-primary"
+                    disabled="@_isSubmitting">
+                @if (_isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                ثبت سند
+            </button>
+
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    @onclick="Cancel"
+                    disabled="@_isSubmitting">
+                انصراف
+            </button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    // ViewModel
+    private CreateDocumentCoverVm _model = new();
+    private bool _isSubmitting = false;
+    private bool _isLoading = false;
+
+    protected override void OnInitialized()
+    {
+        // مقداردهی اولیه
+        _model.FiscalYear = DateTime.Now.Year;
+        _model.DocumentDate = DateTime.Now;
+        _model.DocumentType = DocumentTypeEnum.General;
+    }
+
+    private async Task HandleSubmit()
+    {
+        _isSubmitting = true;
+
+        try
+        {
+            // تبدیل تاریخ به DateOnly
+            var documentDate = DateOnly.FromDateTime(_model.DocumentDate);
+
+            // ایجاد Command
+            var command = new CreateDocumentCoverCommand(
+                _model.FiscalYear,
+                documentDate,
+                _model.DocumentType!.Value, // مطمئن هستیم مقدار دارد
+                _model.Description
+            );
+
+            var documentId = await Mediator.Send(command);
+
+            // نمایش پیام موفقیت
+            // می‌توانید از Toast یا Alert استفاده کنید
+
+            // انتقال به صفحه ثبت آرتیکل‌ها
+            Navigation.NavigateTo($"/documents/{documentId}/lines");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "خطا در ثبت سند");
+            // نمایش خطا به کاربر
+            // می‌توانید از State مدیریت خطا استفاده کنید
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/documents");
+    }
+
+    // ViewModel Class
+    public class CreateDocumentCoverVm
+    {
+        [Required(ErrorMessage = "تاریخ سند الزامی است")]
+        public DateTime DocumentDate { get; set; }
+
+        [Required(ErrorMessage = "سال مالی الزامی است")]
+        [Range(1400, 2030, ErrorMessage = "سال مالی باید بین ۱۴۰۰ تا 2030 باشد")]
+        public int FiscalYear { get; set; }
+
+        [Required(ErrorMessage = "نوع سند الزامی است")]
+        public DocumentTypeEnum? DocumentType { get; set; }
+
+        [Required(ErrorMessage = "شرح سند الزامی است")]
+        [StringLength(500, ErrorMessage = "شرح سند نمی‌تواند بیش از ۵۰۰ کاراکتر باشد")]
+        public string Description { get; set; } = string.Empty;
+    }
+}

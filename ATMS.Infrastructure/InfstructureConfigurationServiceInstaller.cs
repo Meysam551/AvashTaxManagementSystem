@@ -9,52 +9,36 @@ namespace ATMS.Infrastructure;
 
 public static class InfrastructureConfigurationServiceInstaller
 {
-    private static bool _isConfigured = false;
-    private static readonly object _lockObject = new object();
-
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration,
-        bool isDevelopmentEnvironment = false,  // تغییر به bool
+        bool isDevelopmentEnvironment = false,
         string connectionStringName = "OracleConnection")
     {
-        if (_isConfigured)
-            return services;
+        var connectionString = configuration.GetConnectionString(connectionStringName);
 
-        lock (_lockObject)
+        if (string.IsNullOrEmpty(connectionString))
         {
-            if (_isConfigured)
-                return services;
-
-            var connectionString = configuration.GetConnectionString(connectionStringName);
-
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                connectionString = BuildOracleConnectionString(configuration);
-            }
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseOracle(connectionString);
-
-                if (isDevelopmentEnvironment) 
-                {
-                    options.EnableSensitiveDataLogging();
-                    options.EnableDetailedErrors();
-                }
-            });
-
-            services.AddDbContextFactory<ApplicationDbContext>(options =>
-            {
-                options.UseOracle(connectionString);
-            });
-
-
-            services.AddScoped<IDocHeadRepository, DocHeadRepository>();
-            services.AddScoped<IDocItemRepository, DocItemRepository>();
-
-            _isConfigured = true;
+            connectionString = BuildOracleConnectionString(configuration);
         }
+
+        // Register DbContextFactory (not regular DbContext)
+        services.AddDbContextFactory<ApplicationDbContext>(options =>
+        {
+            options.UseOracle(connectionString);
+
+            if (isDevelopmentEnvironment)
+            {
+                options.EnableSensitiveDataLogging();
+                options.EnableDetailedErrors();
+            }
+        },
+        lifetime: ServiceLifetime.Scoped); // IMPORTANT: Make it Scoped
+
+        // Register repositories - they'll use the factory
+        services.AddScoped<IDocHeadRepository, DocHeadRepository>();
+        services.AddScoped<IDocItemRepository, DocItemRepository>();
+        services.AddScoped<IDocumentCoverRepository, DocumentCoverRepository>();
 
         return services;
     }

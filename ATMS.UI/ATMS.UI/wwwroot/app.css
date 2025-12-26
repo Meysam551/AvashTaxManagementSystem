@@ -1,5 +1,22 @@
+﻿/* ایمپورت فونت */
+@import url('iransans.css');
+
+/* یا مستقیم تعریف کنید */
+@font-face {
+    font-family: 'IRANSans';
+    src: url('../lib/fonts/IRANSans-web.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* تنظیمات عمومی */
+:root {
+    --iransans-font: 'IRANSans', Tahoma, Arial, sans-serif;
+}
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'IRANSans', Helvetica, Arial, sans-serif;
 }
 
 a, .btn-link {
@@ -57,4 +74,36 @@ h1:focus {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+/* برای عناصر خاص */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'IRANSans', Tahoma, Arial, sans-serif;
+    font-weight: 700;
+}
+
+/* برای اعداد فارسی */
+.persian-numbers {
+    font-family: 'IRANSansFaNum', 'IRANSans', Tahoma, Arial, sans-serif;
+}
+
+/* کلاس‌های کمکی برای وزن‌های مختلف */
+.font-light {
+    font-weight: 300;
+}
+
+.font-normal {
+    font-weight: 400;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.font-black {
+    font-weight: 900;
 }

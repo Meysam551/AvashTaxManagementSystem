@@ -1,5 +1,9 @@
-using ATMS.UI.Client.Pages;
+﻿
+using System.Reflection.Metadata;
+using ATMS.ApplicationService;
+using ATMS.Infrastructure;
 using ATMS.UI.Components;
+using MediatR;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +12,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddInfrastructureServices(
+    configuration: builder.Configuration,
+    isDevelopmentEnvironment: builder.Environment.IsDevelopment()
+);
+
+// ✅ MediatR
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
+
+builder.Services.AddTransient<IRequestHandler<CreateDocumentCoverCommand, Guid>,
+    CreateDocumentCoverCommandHandler>();
+
+// ✅ AutoMapper
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+
 
 #region config serilog
 Log.Logger = new LoggerConfiguration()
@@ -29,6 +49,12 @@ builder.Host.UseSerilog((ctx, lc) =>
     lc.ReadFrom.Configuration(ctx.Configuration));
 #endregion
 
+builder.Services
+    .AddAuthentication("DevCookie")
+    .AddCookie("DevCookie");
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -46,6 +72,9 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
