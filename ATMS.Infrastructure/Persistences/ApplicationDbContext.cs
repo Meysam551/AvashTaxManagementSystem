@@ -24,6 +24,7 @@ public class ApplicationDbContext : BaseDbContext
 
     public DbSet<DocHead> DocHeads => Set<DocHead>();
     public DbSet<DocItem> DocItems => Set<DocItem>();
+    public DbSet<DocumentCover> DocumentCovers => Set<DocumentCover>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
