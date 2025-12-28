@@ -1,6 +1,6 @@
 ﻿@page "/documents/create"
+@using MudBlazor
 @rendermode RenderMode.InteractiveServer
-@* @attribute [Authorize] *@
 @inject IMediator Mediator
 @inject NavigationManager Navigation
 @inject ILogger<CreateDocumentCover> Logger
@@ -17,8 +17,7 @@
 }
 else
 {
-    <EditForm Model="_model"
-              OnValidSubmit="HandleSubmit">
+    <EditForm Model="_model" OnValidSubmit="HandleSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary class="alert alert-danger" />
 
@@ -26,9 +25,21 @@ else
             <div class="col-md-3">
                 <div class="mb-3">
                     <label class="form-label">تاریخ سند *</label>
-                    <InputDate @bind-Value="_model.DocumentDate"
-                               class="form-control"
-                               max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <!-- استفاده از @bind-Date با مشخص کردن نوع -->
+                    <MudDatePicker @bind-Date="_model.DocumentDate"
+                                   T="DateTime?"
+                                   Label="تاریخ سند"
+                                   DateFormat="yyyy/MM/dd"
+                                   FirstDayOfWeek="DayOfWeek.Saturday"
+                                   Editable="true"
+                                   Required="true"
+                                   RequiredError="لطفا تاریخ را وارد نمایید"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   MaxDate="@DateTime.Now"
+                                   Class="form-control">
+                        <DateIcon>@Icons.Material.Filled.DateRange</DateIcon>
+                    </MudDatePicker>
                     <ValidationMessage For="@(() => _model.DocumentDate)" />
                 </div>
             </div>

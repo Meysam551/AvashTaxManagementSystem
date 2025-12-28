@@ -34,6 +34,6 @@ public class CreateDocumentCoverCommandHandler
 
         var result = await _repository.AddAsync(document, cancellationToken);
 
-        return result;
+        return result.Value;
     }
 }

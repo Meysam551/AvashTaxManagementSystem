@@ -6,17 +6,22 @@ namespace ATMS.UI.Components.Pages
 {
     public partial class CreateDocumentCover
     {
-        // ViewModel
-        private CreateDocumentCoverVm _model = new();
-        private bool _isSubmitting = false;
         private bool _isLoading = false;
+        private bool _isSubmitting = false;
+        private CreateDocumentCoverModel _model = new();
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
-            // مقداردهی اولیه
-            _model.FiscalYear = DateTime.Now.Year;
-            _model.DocumentDate = DateTime.Now;
-            _model.DocumentType = DocumentTypeEnum.General;
+            try
+            {
+                _isLoading = true;
+                // مقداردهی اولیه
+                _model.FiscalYear = DateTime.Now.Year;
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         private async Task HandleSubmit()
@@ -26,13 +31,13 @@ namespace ATMS.UI.Components.Pages
             try
             {
                 // تبدیل تاریخ به DateOnly
-                var documentDate = DateOnly.FromDateTime(_model.DocumentDate);
+                var documentDate = DateOnly.FromDateTime(_model.DocumentDate ?? DateTime.Now);
 
                 // ایجاد Command
                 var command = new CreateDocumentCoverCommand(
                     _model.FiscalYear,
                     documentDate,
-                    _model.DocumentType!.Value, // مطمئن هستیم مقدار دارد
+                    (DocumentTypeEnum)_model.DocumentType!.Value,
                     _model.Description
                 );
 
@@ -48,7 +53,6 @@ namespace ATMS.UI.Components.Pages
             {
                 Logger.LogError(ex, "خطا در ثبت سند");
                 // نمایش خطا به کاربر
-                // می‌توانید از State مدیریت خطا استفاده کنید
             }
             finally
             {
@@ -61,21 +65,21 @@ namespace ATMS.UI.Components.Pages
             Navigation.NavigateTo("/documents");
         }
 
-        // ViewModel Class
-        public class CreateDocumentCoverVm
+        // کلاس مدل
+        public class CreateDocumentCoverModel
         {
-            [Required(ErrorMessage = "تاریخ سند الزامی است")]
-            public DateTime DocumentDate { get; set; }
-
             [Required(ErrorMessage = "سال مالی الزامی است")]
-            [Range(1400, 2030, ErrorMessage = "سال مالی باید بین ۱۴۰۰ تا 2030 باشد")]
+            [Range(1400, 2030, ErrorMessage = "سال مالی باید بین 1400 تا 2030 باشد")]
             public int FiscalYear { get; set; }
 
+            [Required(ErrorMessage = "تاریخ سند الزامی است")]
+            public DateTime? DocumentDate { get; set; } = DateTime.Now; // به nullable تغییر دهید
+
             [Required(ErrorMessage = "نوع سند الزامی است")]
-            public DocumentTypeEnum? DocumentType { get; set; }
+            public int? DocumentType { get; set; }
 
             [Required(ErrorMessage = "شرح سند الزامی است")]
-            [StringLength(500, ErrorMessage = "شرح سند نمی‌تواند بیش از ۵۰۰ کاراکتر باشد")]
+            [StringLength(500, ErrorMessage = "شرح سند نمی‌تواند بیش از 500 کاراکتر باشد")]
             public string Description { get; set; } = string.Empty;
         }
     }

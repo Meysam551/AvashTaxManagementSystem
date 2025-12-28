@@ -1,10 +1,12 @@
 ﻿
-using System.Reflection.Metadata;
 using ATMS.ApplicationService;
 using ATMS.Infrastructure;
 using ATMS.UI.Components;
 using MediatR;
+using MudBlazor;
+using MudBlazor.Services;
 using Serilog;
+using System.Reflection.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,7 @@ builder.Services.AddTransient<IRequestHandler<CreateDocumentCoverCommand, Guid>,
 // ✅ AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
+builder.Services.AddMudServices();
 
 #region config serilog
 Log.Logger = new LoggerConfiguration()
@@ -70,7 +73,7 @@ else
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.UseAuthentication();
@@ -82,4 +85,19 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(ATMS.UI.Client._Imports).Assembly);
 
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Unhandled exception: {ex}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        throw;
+    }
+});
+
 app.Run();
+
