@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <Folder Include="Accountings\Events\" />
+    <Folder Include="Identity\Commands\" />
+    <Folder Include="Identity\Dtos\" />
+    <Folder Include="Identity\Behaviors\" />
+    <Folder Include="Identity\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
