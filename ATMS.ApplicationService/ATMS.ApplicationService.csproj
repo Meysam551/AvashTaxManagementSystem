@@ -7,11 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Accountings\Commands\CreateDocHeadCommand.cs" />
+    <Compile Remove="Accountings\Queries\GetDocHeadListQuery.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Accountings\Events\" />
-    <Folder Include="Identity\Commands\" />
-    <Folder Include="Identity\Dtos\" />
-    <Folder Include="Identity\Behaviors\" />
-    <Folder Include="Identity\Queries\" />
+    <Folder Include="Accountings\Queries\" />
+    <Folder Include="ATMSUsers\Dtos\" />
+    <Folder Include="ATMSUsers\Behaviors\" />
+    <Folder Include="ATMSUsers\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ATMS.Domain\ATMS.Domain.csproj" />
-    <ProjectReference Include="..\ATMS.Infrastructure\ATMS.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

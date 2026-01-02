@@ -22,5 +22,10 @@ public class DocHeadConfiguration : IEntityTypeConfiguration<DocHead>
             .HasMaxLength(10);
         builder.Property(e => e.DocDescription).HasColumnName("DocDesc")
             .HasMaxLength(100);
+
+        builder.HasMany(e => e.DocItems)
+            .WithOne(di => di.DocHead)
+            .HasForeignKey(di => di.DocHeadId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -6,7 +6,7 @@ using MediatR;
 namespace ATMS.ApplicationService;
 
 public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+    where TRequest :  IRequest<ErrorOr<TResponse>>
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 

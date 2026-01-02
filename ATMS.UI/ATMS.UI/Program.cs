@@ -1,12 +1,11 @@
 ﻿
 using ATMS.ApplicationService;
-using ATMS.Infrastructure;
 using ATMS.UI.Components;
 using MediatR;
-using MudBlazor;
 using MudBlazor.Services;
 using Serilog;
 using System.Reflection.Metadata;
+using ATMS.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +15,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddInfrastructureServices(
-    configuration: builder.Configuration,
-    isDevelopmentEnvironment: builder.Environment.IsDevelopment()
+    configuration: builder.Configuration
 );
 
 // ✅ MediatR

@@ -1,20 +1,15 @@
 ﻿
 namespace ATMS.Domain.Entities;
 
-public record DocumentCoverId
+public sealed record DocumentCoverId
 {
-    public DocumentCoverId()
-    {
-    }
+    public Guid Value { get; }
 
-    public Guid Value { get; set; }
-
-    public DocumentCoverId(Guid value)
-    {
-        Value = value;
-    }
+    public DocumentCoverId(Guid value) => Value = value;
 
     public static DocumentCoverId CreateNew() => new(Guid.NewGuid());
-    public static DocumentCoverId Create(Guid value) => new(value);
-    public static DocumentCoverId Empty() => new(Guid.Empty);
+
+    public static DocumentCoverId Of(Guid value) => new(value);
+
+    public override string ToString() => Value.ToString();
 }

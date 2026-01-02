@@ -11,19 +11,19 @@ public class DocHead : AuditableAggregate<DocHeadId>
     public string DocNo { get; set; } = string.Empty;
     public string DocDescription { get; set; } = string.Empty;
 
-    public ICollection<DocItem> DocItems { get; set; }
+    public ICollection<DocItem> DocItems { get; set; } = new List<DocItem>();
 
-    public DocHead() { }
+    private DocHead() { }
 
     public DocHead(string docSerNo, string officeCode, string docYear, string docNo, string docDesc)
     {
-        this.Id = DocHeadId.CreateNew();
-        this.DocSerialNo = docSerNo;
-        this.OfficeCode = officeCode;
-        this.DocYear = docYear;
-        this.DocNo = docNo;
-        this.DocDescription = docDesc;
-        this.CDT = DateTime.UtcNow;
+        Id = DocHeadId.CreateNew();
+        DocSerialNo = docSerNo;
+        OfficeCode = officeCode;
+        DocYear = docYear;
+        DocNo = docNo;
+        DocDescription = docDesc;
+        CDT = DateTime.UtcNow;
     }
 
     public static DocHead Create(string docSerNo, string officeCode, string docYear, string docNo, string docDesc)
