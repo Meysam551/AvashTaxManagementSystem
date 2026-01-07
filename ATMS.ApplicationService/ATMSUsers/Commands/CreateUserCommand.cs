@@ -28,7 +28,7 @@ internal sealed class CreateUserCommandHandler : IRequestHandler<CreateUserComma
     public async Task<ErrorOr<ATMSUserId>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         // 1️⃣ Identity
-        var userId = await _identityRepository.CreateUserAsync(
+        var userId = await _identityRepository.CreateAsync(
             request.Username,
             request.Password,
             request.Email,

@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <Folder Include="Accountings\Events\" />
-    <Folder Include="Accountings\Queries\" />
     <Folder Include="ATMSUsers\Dtos\" />
     <Folder Include="ATMSUsers\Behaviors\" />
     <Folder Include="ATMSUsers\Queries\" />

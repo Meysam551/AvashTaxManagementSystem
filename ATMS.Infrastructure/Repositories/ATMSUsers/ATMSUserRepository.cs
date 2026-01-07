@@ -1,10 +1,11 @@
 ﻿
+using ATMS.Domain.Contracts;
 using ATMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ATMS.Infrastructure;
 
-public class ATMSUserRepository
+public class ATMSUserRepository : IUserRepository
 {
     private readonly IDbContextFactory<ApplicationDbContext> _context;
 

@@ -1,6 +1,6 @@
 ﻿
 using ATMS.Domain.Contracts;
-using ATMS.Domain.Entities;
+using ATMS.Shared.Enums;
 using MediatR;
 
 namespace ATMS.ApplicationService;
@@ -8,7 +8,7 @@ namespace ATMS.ApplicationService;
 public record CreateDocumentCoverCommand(
     int FiscalYear,
     DateOnly DocumentDate,
-    DocumentTypeEnum DocumentType,
+    DocumentType DocumentType,
     string Description) : IRequest<Guid>;
 
 // Handler
@@ -29,7 +29,12 @@ public class CreateDocumentCoverCommandHandler
         var document = new Shared.Dtos.DocumentCoverDto
         {
             FiscalYear = request.FiscalYear,
-            DocumentDate = request.DocumentDate
+            DocumentDate = request.DocumentDate,
+            Description = request.Description,
+            DocumentNumber = 1,
+            DocumentType = request.DocumentType,
+            PostedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
         };
 
         var result = await _repository.AddAsync(document, cancellationToken);

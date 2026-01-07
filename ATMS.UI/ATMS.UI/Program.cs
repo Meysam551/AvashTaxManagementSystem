@@ -1,11 +1,11 @@
 ﻿
+using System.Reflection.Metadata;
 using ATMS.ApplicationService;
+using ATMS.Infrastructure;
 using ATMS.UI.Components;
 using MediatR;
 using MudBlazor.Services;
 using Serilog;
-using System.Reflection.Metadata;
-using ATMS.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,12 +18,11 @@ builder.Services.AddInfrastructureServices(
     configuration: builder.Configuration
 );
 
+builder.Services.AddApplicationServices();
+
 // ✅ MediatR
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
-
-builder.Services.AddTransient<IRequestHandler<CreateDocumentCoverCommand, Guid>,
-    CreateDocumentCoverCommandHandler>();
 
 // ✅ AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());

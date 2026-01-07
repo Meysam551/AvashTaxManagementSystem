@@ -1,0 +1,179 @@
+﻿@using System.Globalization
+@using MudBlazor
+
+<MudStack>
+    <!-- Date Picker -->
+    <MudDatePicker Label="تاریخ"
+                   Date="@SelectedDateTime"
+                   DateChanged="@OnDateChanged"
+                   DateFormat="yyyy/MM/dd"
+                   FirstDayOfWeek="DayOfWeek.Saturday"
+                   Editable="true"
+                   Culture="@persianCulture"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   PickerVariant="PickerVariant.Dialog"
+                   OpenTo="OpenTo.Date">
+        <PickerActions>
+            <MudButton OnClick="@(() => ClearDate())" Variant="Variant.Text" Color="Color.Error">پاک کردن</MudButton>
+            <MudButton OnClick="@(() => SetToday())" Variant="Variant.Text" Color="Color.Primary">امروز</MudButton>
+        </PickerActions>
+    </MudDatePicker>
+
+    <!-- Time Picker -->
+    @if (ShowTimePicker)
+    {
+        <MudTimePicker Label="زمان"
+                       Time="@SelectedTime"
+                       TimeChanged="@OnTimeChanged"
+                       Editable="true"
+                       Culture="@persianCulture"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       OpenTo="OpenTo.Hours">
+            <PickerActions>
+                <MudButton OnClick="@(() => ClearTime())" Variant="Variant.Text" Color="Color.Error">پاک کردن</MudButton>
+                <MudButton OnClick="@(() => SetCurrentTime())" Variant="Variant.Text" Color="Color.Primary">اکنون</MudButton>
+            </PickerActions>
+        </MudTimePicker>
+    }
+
+    <!-- نمایش تاریخ فارسی -->
+    <MudCard Elevation="2" Class="mt-4">
+        <MudCardContent>
+            <MudText Typo="Typo.h6" Class="mb-2">نمایش فارسی:</MudText>
+            <MudText>
+                تاریخ انتخابی:
+                @if (SelectedDateTime.HasValue)
+                {
+                    @SelectedDateTime.Value.ToString("dddd، dd MMMM yyyy ساعت HH:mm", persianCulture)
+                }
+                else
+                {
+                    <span class="text-muted">تاریخی انتخاب نشده</span>
+                }
+            </MudText>
+            <MudText Size="Size.Small" Color="Color.Secondary" Class="mt-1">
+                میلادی: @SelectedDateTime?.ToString("yyyy/MM/dd HH:mm")
+            </MudText>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
+
+@code {
+    [Parameter]
+    public DateTime? SelectedDateTime { get; set; }
+
+    [Parameter]
+    public EventCallback<DateTime?> SelectedDateTimeChanged { get; set; }
+
+    [Parameter]
+    public string DateLabel { get; set; } = "تاریخ";
+
+    [Parameter]
+    public string TimeLabel { get; set; } = "زمان";
+
+    [Parameter]
+    public bool ShowTimePicker { get; set; } = true;
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    private CultureInfo persianCulture = new CultureInfo("fa-IR");
+
+    // Property برای TimePicker
+    private TimeSpan? SelectedTime
+    {
+        get => SelectedDateTime?.TimeOfDay;
+        set
+        {
+            if (value.HasValue)
+            {
+                var date = SelectedDateTime?.Date ?? DateTime.Today;
+                SelectedDateTime = date.Add(value.Value);
+                SelectedDateTimeChanged.InvokeAsync(SelectedDateTime);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        // تنظیم تقویم فارسی
+        persianCulture.DateTimeFormat.Calendar = new PersianCalendar();
+    }
+
+    private async Task OnDateChanged(DateTime? newDate)
+    {
+        if (newDate.HasValue)
+        {
+            var time = SelectedDateTime?.TimeOfDay ?? TimeSpan.Zero;
+            SelectedDateTime = newDate.Value.Date.Add(time);
+        }
+        else
+        {
+            SelectedDateTime = null;
+        }
+        await SelectedDateTimeChanged.InvokeAsync(SelectedDateTime);
+    }
+
+    private async Task OnTimeChanged(TimeSpan? newTime)
+    {
+        if (newTime.HasValue)
+        {
+            var date = SelectedDateTime?.Date ?? DateTime.Today;
+            SelectedDateTime = date.Add(newTime.Value);
+        }
+        else if (SelectedDateTime.HasValue)
+        {
+            SelectedDateTime = SelectedDateTime.Value.Date;
+        }
+        await SelectedDateTimeChanged.InvokeAsync(SelectedDateTime);
+    }
+
+    private async Task ClearDate()
+    {
+        if (SelectedDateTime.HasValue)
+        {
+            var time = SelectedDateTime.Value.TimeOfDay;
+            SelectedDateTime = null;
+            if (time != TimeSpan.Zero && ShowTimePicker)
+            {
+                SelectedDateTime = DateTime.Today.Add(time);
+            }
+            await SelectedDateTimeChanged.InvokeAsync(SelectedDateTime);
+        }
+    }
+
+    private async Task ClearTime()
+    {
+        if (SelectedDateTime.HasValue)
+        {
+            SelectedDateTime = SelectedDateTime.Value.Date;
+            await SelectedDateTimeChanged.InvokeAsync(SelectedDateTime);
+        }
+    }
+
+    private async Task SetToday()
+    {
+        SelectedDateTime = DateTime.Today;
+        if (ShowTimePicker)
+        {
+            var currentTime = DateTime.Now.TimeOfDay;
+            SelectedDateTime = SelectedDateTime.Value.Add(currentTime);
+        }
+        await SelectedDateTimeChanged.InvokeAsync(SelectedDateTime);
+    }
+
+    private async Task SetCurrentTime()
+    {
+        if (SelectedDateTime.HasValue)
+        {
+            SelectedDateTime = SelectedDateTime.Value.Date.Add(DateTime.Now.TimeOfDay);
+        }
+        else
+        {
+            SelectedDateTime = DateTime.Today.Add(DateTime.Now.TimeOfDay);
+        }
+        await SelectedDateTimeChanged.InvokeAsync(SelectedDateTime);
+    }
+}

@@ -9,7 +9,6 @@
   <ItemGroup>
     <Compile Remove="Contracts\Accountings\IDocHeadRepository.cs" />
     <Compile Remove="Contracts\Accountings\IDocItemRepository.cs" />
-    <Compile Remove="Contracts\ATMSUsers\IIdentityRepository.cs" />
     <Compile Remove="Entities\Accounting\DocHead.cs" />
     <Compile Remove="Entities\Accounting\DocItem.cs" />
     <Compile Remove="Entities\ValueObjects\DocHeadId.cs" />

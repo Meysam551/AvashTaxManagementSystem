@@ -7,14 +7,14 @@ namespace ATMS.Domain.Entities;
 public sealed class DocumentCover : AggregateRoot<DocumentCoverId>
 {
     // Properties
-    public int FiscalYear { get; private set; }
-    public DateOnly DocumentDate { get; private set; }
-    public DocumentTypeEnum DocumentType { get; private set; }
-    public DocumentStatus Status { get; private set; }
-    public string Description { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? PostedAt { get; private set; }
-    public int? DocumentNumber { get; private set; }
+    public int FiscalYear { get; set; }
+    public DateOnly DocumentDate { get; set; }
+    public DocumentType DocumentType { get; set; }
+    public DocumentStatus Status { get; set; }
+    public string Description { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? PostedAt { get; set; }
+    public int? DocumentNumber { get; set; }
 
     // Private constructor for EF Core
     private DocumentCover() { }
@@ -23,7 +23,7 @@ public sealed class DocumentCover : AggregateRoot<DocumentCoverId>
     public static DocumentCover Create(
         int fiscalYear,
         DateOnly documentDate,
-        DocumentTypeEnum documentType,
+        DocumentType documentType,
         string description)
     {
         if (string.IsNullOrWhiteSpace(description))
@@ -45,19 +45,19 @@ public sealed class DocumentCover : AggregateRoot<DocumentCoverId>
         };
     }
 
-    private static void ValidateDocumentType(DocumentTypeEnum type, DateOnly date)
+    private static void ValidateDocumentType(DocumentType type, DateOnly date)
     {
         if (!Enum.IsDefined(typeof(DocumentTypeEnum), type))
             throw new DomainException("نوع سند نامعتبر است");
 
         switch (type)
         {
-            case DocumentTypeEnum.Opening:
+            case DocumentType.Opening:
                 if (date.DayOfYear > 5)
                     throw new DomainException("سند افتتاحیه فقط در 5 روز اول سال مالی");
                 break;
 
-            case DocumentTypeEnum.Closing:
+            case DocumentType.Closing:
                 if (date.Month != 12)
                     throw new DomainException("سند اختتامیه فقط در اسفند ماه");
                 break;
@@ -97,8 +97,8 @@ public sealed class DocumentCover : AggregateRoot<DocumentCoverId>
     public bool IsDraft() => Status == DocumentStatus.Draft;
     public bool IsPosted() => Status == DocumentStatus.Posted;
     public bool IsSystemDocument() =>
-        DocumentType == DocumentTypeEnum.Opening ||
-        DocumentType == DocumentTypeEnum.Closing;
+        DocumentType == DocumentType.Opening ||
+        DocumentType == DocumentType.Closing;
 }
 
 // Enum برای وضعیت سند (در Domain یا Shared)

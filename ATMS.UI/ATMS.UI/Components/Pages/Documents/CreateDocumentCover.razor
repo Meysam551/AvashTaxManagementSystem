@@ -1,9 +1,11 @@
-﻿@page "/documents/create"
+﻿@page "/document-cover/create"
 @using MudBlazor
+@using System.Globalization
 @rendermode RenderMode.InteractiveServer
 @inject IMediator Mediator
 @inject NavigationManager Navigation
 @inject ILogger<CreateDocumentCover> Logger
+@namespace ATMS.UI.Components.Pages
 
 <h3>ثبت سند جدید</h3>
 
@@ -25,22 +27,14 @@ else
             <div class="col-md-3">
                 <div class="mb-3">
                     <label class="form-label">تاریخ سند *</label>
-                    <!-- استفاده از @bind-Date با مشخص کردن نوع -->
-                    <MudDatePicker @bind-Date="_model.DocumentDate"
-                                   T="DateTime?"
-                                   Label="تاریخ سند"
-                                   DateFormat="yyyy/MM/dd"
-                                   FirstDayOfWeek="DayOfWeek.Saturday"
-                                   Editable="true"
-                                   Required="true"
-                                   RequiredError="لطفا تاریخ را وارد نمایید"
-                                   Variant="Variant.Outlined"
-                                   Margin="Margin.Dense"
-                                   MaxDate="@DateTime.Now"
-                                   Class="form-control">
-                        <DateIcon>@Icons.Material.Filled.DateRange</DateIcon>
-                    </MudDatePicker>
-                    <ValidationMessage For="@(() => _model.DocumentDate)" />
+                    <InputText @bind-Value="PersianDateString"
+                               class="form-control"
+                               @attributes="GetInputAttributes()"
+                               placeholder="۱۴۰۳/۱۰/۱۸" />
+                    @if (_dateError)
+                    {
+                        <div class="invalid-feedback">قالب تاریخ باید ۱۴۰۳/۱۰/۱۸ باشد</div>
+                    }
                 </div>
             </div>
 
@@ -61,9 +55,9 @@ else
                     <InputSelect @bind-Value="_model.DocumentType"
                                  class="form-select">
                         <option value="">-- انتخاب کنید --</option>
-                        @foreach (DocumentTypeEnum type in Enum.GetValues(typeof(DocumentTypeEnum)))
+                        @foreach (var item in DocumentTypeOptions)
                         {
-                            <option value="@type">@type.GetDisplayName()</option>
+                            <option value="@item.Value">@item.Text</option>
                         }
                     </InputSelect>
                     <ValidationMessage For="@(() => _model.DocumentType)" />

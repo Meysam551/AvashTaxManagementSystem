@@ -1,4 +1,5 @@
 ﻿
+using System.Threading;
 using ATMS.Domain.Contracts;
 using ATMS.Domain.Entities;
 using ATMS.Shared;
@@ -35,18 +36,19 @@ public class DocumentCoverRepository : IDocumentCoverRepository
 
             // Check existence
             _logger.LogTrace("Checking if document {DocumentNumber} already exists", model.DocumentNumber);
-            var existDocCover = await context.DocumentCovers
-                .FirstOrDefaultAsync(s => s.DocumentNumber == model.DocumentNumber, cancellationToken);
+            //var existDocCover = await context.DocumentCovers
+            //    .FirstOrDefaultAsync(s => s.DocumentNumber == model.DocumentNumber, cancellationToken);
 
-            if (existDocCover is not null)
-            {
-                _logger.LogWarning("Document {DocumentNumber} already exists with ID: {ExistingId}",
-                    model.DocumentNumber, existDocCover.Id);
-                return Result<Guid>.Success(existDocCover.Id.Value);
-            }
+            //if (existDocCover is not null)
+            //{
+            //    _logger.LogWarning("Document {DocumentNumber} already exists with ID: {ExistingId}",
+            //        model.DocumentNumber, existDocCover.Id);
+            //    return Result<Guid>.Success(existDocCover.Id.Value);
+            //}
 
             // Create entity
             var entity = _mapper.Map<DocumentCover>(model);
+            entity.Id = DocumentCoverId.CreateNew();
             context.DocumentCovers.Add(entity);
 
             _logger.LogDebug("Saving new document {DocumentNumber} to database", model.DocumentNumber);
@@ -84,6 +86,39 @@ public class DocumentCoverRepository : IDocumentCoverRepository
         {
             _logger.LogTrace("Completed {Operation} for document {DocumentNumber}",
                 operation, model.DocumentNumber);
+        }
+    }
+
+    public async Task<IReadOnlyList<DocumentCoverDto>> GetListAsync(CancellationToken cancellationToken)
+    {
+        const string operation = nameof(GetListAsync);
+
+        _logger.LogDebug("Starting {Operation}", operation);
+
+        try
+        {
+            await using var context = await _dbContext.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
+
+            var list = await context.DocumentCovers.ToListAsync(cancellationToken);
+
+            return _mapper.Map<IReadOnlyList<DocumentCoverDto>>(list);
+        }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx,
+                "Database error in {Operation} for get document list. Inner: {InnerMessage}",
+                operation, dbEx.InnerException?.Message);
+            throw;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex,
+                "Unexpected error in {Operation} for get document", operation);
+            throw;
+        }
+        finally
+        {
+            _logger.LogTrace("Completed {Operation} for get document list",operation);
         }
     }
 }
