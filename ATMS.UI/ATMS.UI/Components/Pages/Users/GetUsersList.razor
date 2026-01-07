@@ -1,0 +1,50 @@
+﻿@page "/users"
+@inject IMediator Mediator
+
+<h3 class="mb-4">Users List</h3>
+
+@if (_users is null)
+{
+    <p>Loading...</p>
+}
+else if (!_users.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in _users)
+            {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Email</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<ATMSUserDto>? _users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Mediator.Send(new GetUserListQuery());
+
+        _users = result.Match(
+            list => list,
+            errors => new List<ATMSUserDto>()); // خطاها را فعلاً خالی نمایش می‌دهیم
+    }
+}

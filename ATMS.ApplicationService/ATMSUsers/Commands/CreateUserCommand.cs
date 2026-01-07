@@ -14,12 +14,12 @@ public sealed record CreateUserCommand(
     string Email
 ) : IRequest<ErrorOr<ATMSUserId>>;
 
-internal sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ErrorOr<ATMSUserId>>
+public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ErrorOr<ATMSUserId>>
 {
-    private readonly IIdentityRepository _identityRepository;
+    private readonly IIdentityService _identityRepository;
     private readonly IUserRepository _userRepository;
 
-    public CreateUserCommandHandler(IIdentityRepository identityRepository, IUserRepository userRepository)
+    public CreateUserCommandHandler(IIdentityService identityRepository, IUserRepository userRepository)
     {
         this._identityRepository = identityRepository;
         this._userRepository = userRepository;
@@ -27,14 +27,12 @@ internal sealed class CreateUserCommandHandler : IRequestHandler<CreateUserComma
 
     public async Task<ErrorOr<ATMSUserId>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        // 1️⃣ Identity
         var userId = await _identityRepository.CreateUserAsync(
             request.Username,
             request.Password,
             request.Email,
             cancellationToken);
 
-        // 2️⃣ Domain
         var profile = new ATMSUserProfile(
             request.FirstName,
             request.LastName,
@@ -42,7 +40,6 @@ internal sealed class CreateUserCommandHandler : IRequestHandler<CreateUserComma
 
         var user = new ATMSUser(userId, request.Username, profile);
 
-        // 3️⃣ Persist Domain
         await _userRepository.AddAsync(user, cancellationToken);
 
         return userId;

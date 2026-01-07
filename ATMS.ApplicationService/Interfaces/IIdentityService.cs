@@ -3,7 +3,7 @@ using ATMS.Domain.Entities;
 
 namespace ATMS.ApplicationService;
 
-public interface IIdentityRepository
+public interface IIdentityService
 {
     Task<ATMSUserId> CreateUserAsync(
         string username,

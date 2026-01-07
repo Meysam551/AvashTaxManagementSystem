@@ -1,0 +1,94 @@
+﻿@page "/create-user"
+@inject IMediator Mediator
+@rendermode RenderMode.InteractiveServer
+
+<h3 class="mb-4">ثبت نام کاربر (نسخه نسنی)</h3>
+
+<EditForm Model="_model" OnValidSubmit="Submit" FormName="CreateUserForm">
+    <DataAnnotationsValidator />
+
+    <!-- Username -->
+    <div class="mb-3">
+        <label class="form-label">@GetDisplayName(() => _model.Username)</label>
+        <InputText class="form-control" @bind-Value="_model.Username" />
+        <ValidationMessage For="@(() => _model.Username)" />
+    </div>
+
+    <!-- Email -->
+    <div class="mb-3">
+        <label class="form-label">@GetDisplayName(() => _model.Email)</label>
+        <InputText type="email" class="form-control" @bind-Value="_model.Email" />
+        <ValidationMessage For="@(() => _model.Email)" />
+    </div>
+
+    <!-- First Name -->
+    <div class="mb-3">
+        <label class="form-label">@GetDisplayName(() => _model.FirstName)</label>
+        <InputText class="form-control" @bind-Value="_model.FirstName" />
+        <ValidationMessage For="@(() => _model.FirstName)" />
+    </div>
+
+    <!-- Last Name -->
+    <div class="mb-3">
+        <label class="form-label">@GetDisplayName(() => _model.LastName)</label>
+        <InputText class="form-control" @bind-Value="_model.LastName" />
+        <ValidationMessage For="@(() => _model.LastName)" />
+    </div>
+
+    <!-- Password -->
+    <div class="mb-3">
+        <label class="form-label">@GetDisplayName(() => _model.Password)</label>
+        <InputText type="password" class="form-control" @bind-Value="_model.Password" />
+        <ValidationMessage For="@(() => _model.Password)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">ایجاد کن</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(_result))
+{
+    <div class="alert alert-success mt-3">
+        @_result
+    </div>
+}
+
+@code {
+    private CreateUserVm _model = new();
+    private string? _result;
+
+    protected override void OnInitialized()
+    {
+    }
+
+    private async Task Submit()
+    {
+        //if (_editContext?.Validate() ?? false)
+        {
+            var command = new CreateUserCommand(
+                _model.Username,
+                _model.Password,
+                _model.FirstName,
+                _model.LastName,
+                _model.Email);
+
+            var result = await Mediator.Send(command);
+
+            _result = result.Match(
+                userId => $"User created: {userId.Value}",
+                errors => "Error occurred");
+        }
+    }
+
+    // Helper برای گرفتن DisplayAttribute از DataAnnotations
+    private string GetDisplayName<T>(Expression<Func<T>> accessor)
+    {
+        if (accessor.Body is MemberExpression member)
+        {
+            var display = member.Member
+                                .GetCustomAttributes(typeof(DisplayAttribute), true)
+                                .FirstOrDefault() as DisplayAttribute;
+            return display?.Name ?? member.Member.Name;
+        }
+        return "";
+    }
+}

@@ -61,11 +61,13 @@ public static class InfrastructureConfigurationServiceInstaller
         }, lifetime: ServiceLifetime.Scoped);
 
         // Repositories
-        services.AddScoped<IIdentityRepository, IdentityRepository>();
+        services.AddScoped<IIdentityService, IdentityRepository>();
 
         //services.AddScoped<IDocHeadRepository, DocHeadRepository>();
         //services.AddScoped<IDocItemRepository, DocItemRepository>();
         services.AddScoped<IDocumentCoverRepository, DocumentCoverRepository>();
+        services.AddScoped<IIdentityService, IdentityRepository>();
+        services.AddScoped<IUserRepository, ATMSUserRepository>();
 
         //services.AddScoped<IEntityTypeConfiguration<DocHead>, DocHeadConfiguration>();
 

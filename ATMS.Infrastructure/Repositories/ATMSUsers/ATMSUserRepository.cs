@@ -1,10 +1,11 @@
 ﻿
+using ATMS.Domain.Contracts;
 using ATMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ATMS.Infrastructure;
 
-public class ATMSUserRepository
+public class ATMSUserRepository : IUserRepository
 {
     private readonly IDbContextFactory<ApplicationDbContext> _context;
 
@@ -48,5 +49,11 @@ public class ATMSUserRepository
         await using var context = await _context.CreateDbContextAsync(ct);
 
         return await context.ATMSUsers.AnyAsync(x => x.Id == userId, ct);
+    }
+
+    public async Task<IEnumerable<ATMSUser?>> GetListAsync(CancellationToken ct)
+    {
+        await using var context = await _context.CreateDbContextAsync(ct);
+        return await context.ATMSUsers.ToListAsync(ct);
     }
 }
