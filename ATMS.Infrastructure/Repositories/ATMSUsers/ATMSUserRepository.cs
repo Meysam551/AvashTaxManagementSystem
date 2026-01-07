@@ -50,4 +50,10 @@ public class ATMSUserRepository : IUserRepository
 
         return await context.ATMSUsers.AnyAsync(x => x.Id == userId, ct);
     }
+
+    public async Task<IEnumerable<ATMSUser?>> GetListAsync(CancellationToken ct)
+    {
+        await using var context = await _context.CreateDbContextAsync(ct);
+        return await context.ATMSUsers.ToListAsync(ct);
+    }
 }

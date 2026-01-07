@@ -23,7 +23,6 @@ public static class ApplicationConfigurationServiceInstaller
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(ApplicationConfigurationServiceInstaller).Assembly));
 
-        // ✅ AutoMapper
         services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
         services.AddTransient<IRequestHandler<CreateDocumentCoverCommand, Guid>,

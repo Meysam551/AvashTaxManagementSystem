@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ATMS.Infrastructure;
 
-public class IdentityRepository : IIdentityRepository
+public class IdentityRepository : IIdentityService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
