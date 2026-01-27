@@ -5,11 +5,15 @@ namespace ATMS.ApplicationService;
 
 public interface IIdentityService
 {
-    Task<ATMSUserId> CreateUserAsync(
+    Task<ATMSUserId> CreateAsync(
         string username,
         string password,
         string email,
         CancellationToken ct);
+
+    Task DeleteAsync(
+    ATMSUserId userId,
+    CancellationToken ct);
 
     Task UpdateEmailAsync(
         ATMSUserId userId,

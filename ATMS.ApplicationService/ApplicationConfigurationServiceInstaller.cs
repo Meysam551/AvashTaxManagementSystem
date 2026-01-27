@@ -1,5 +1,7 @@
 ﻿
 using System.Reflection;
+using ATMS.Shared.Dtos;
+using ErrorOr;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +24,12 @@ public static class ApplicationConfigurationServiceInstaller
             cfg.RegisterServicesFromAssembly(typeof(ApplicationConfigurationServiceInstaller).Assembly));
 
         services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+
+        services.AddTransient<IRequestHandler<CreateDocumentCoverCommand, Guid>,
+            CreateDocumentCoverCommandHandler>();
+
+        services.AddTransient<IRequestHandler<GetDocumentCoversQuery, ErrorOr<IReadOnlyList<DocumentCoverDto>>>,
+            GetDocumentCoversQueryHandler>();
 
         return services;
     }

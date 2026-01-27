@@ -1,0 +1,67 @@
+﻿
+
+<MudDateRangePicker Label="بازه تاریخ"
+                    @bind-DateRange="SelectedDateRange"
+                    DateFormat="yyyy/MM/dd"
+                    FirstDayOfWeek="DayOfWeek.Saturday"
+                    Culture="@persianCulture"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    RangeInputVariant="RangeInputVariant.Separated">
+    <RangePickerActions>
+        <MudButton OnClick="ClearRange" Variant="Variant.Text" Color="Color.Error">پاک کردن</MudButton>
+        <MudButton OnClick="SetThisWeek" Variant="Variant.Text" Color="Color.Primary">هفته جاری</MudButton>
+        <MudButton OnClick="SetThisMonth" Variant="Variant.Text" Color="Color.Primary">ماه جاری</MudButton>
+    </RangePickerActions>
+</MudDateRangePicker>
+
+@if (SelectedDateRange.Start != null || SelectedDateRange.End != null)
+{
+    <MudAlert Severity="Severity.Info" Class="mt-2">
+        <MudText>
+            از: @(SelectedDateRange.Start?.ToString("yyyy/MM/dd", persianCulture) ?? "-")
+            تا: @(SelectedDateRange.End?.ToString("yyyy/MM/dd", persianCulture) ?? "-")
+        </MudText>
+    </MudAlert>
+}
+
+@code {
+    [Parameter]
+    public DateRange SelectedDateRange { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<DateRange> SelectedDateRangeChanged { get; set; }
+
+    private CultureInfo persianCulture = new CultureInfo("fa-IR");
+
+    protected override void OnInitialized()
+    {
+        persianCulture.DateTimeFormat.Calendar = new PersianCalendar();
+    }
+
+    private async Task ClearRange()
+    {
+        SelectedDateRange = new DateRange();
+        await SelectedDateRangeChanged.InvokeAsync(SelectedDateRange);
+    }
+
+    private async Task SetThisWeek()
+    {
+        var today = DateTime.Now;
+        var startOfWeek = today.AddDays(-(int)today.DayOfWeek);
+        var endOfWeek = startOfWeek.AddDays(6);
+        
+        SelectedDateRange = new DateRange(startOfWeek, endOfWeek);
+        await SelectedDateRangeChanged.InvokeAsync(SelectedDateRange);
+    }
+
+    private async Task SetThisMonth()
+    {
+        var today = DateTime.Now;
+        var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+        
+        SelectedDateRange = new DateRange(firstDayOfMonth, lastDayOfMonth);
+        await SelectedDateRangeChanged.InvokeAsync(SelectedDateRange);
+    }
+}

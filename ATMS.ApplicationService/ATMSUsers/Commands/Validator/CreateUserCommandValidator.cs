@@ -10,11 +10,13 @@ public class CreateUserCommandValidator
     {
         RuleFor(x => x.Username)
             .NotEmpty()
-            .MinimumLength(5);
+            .MinimumLength(5)
+            .MaximumLength(100);
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .MinimumLength(8);
+            .MinimumLength(8)
+            .MaximumLength(100);
 
         RuleFor(x => x.Email)
             .EmailAddress();

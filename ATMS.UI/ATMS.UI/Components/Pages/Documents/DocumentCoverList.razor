@@ -1,0 +1,237 @@
+﻿@page "/"
+@using ATMS.Shared.Dtos
+@using ATMS.Shared.Enums
+@rendermode RenderMode.InteractiveServer
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+@inject ILogger<DocumentCoverList> Logger
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>لیست روکش های ثبت شده</h3>
+        <button class="btn btn-primary" @onclick="NavigateToCreate">
+            <i class="bi bi-plus-circle me-2"></i>سند جدید
+        </button>
+    </div>
+
+    <!-- فیلترها -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">سال مالی</label>
+                    <InputNumber @bind-Value="_filter.FiscalYear"
+                                 class="form-control"
+                                 placeholder="مثال: 1403" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">نوع سند</label>
+                    <InputSelect @bind-Value="_filter.DocumentType" class="form-select">
+                        <option value="">همه</option>
+                        @foreach (DocumentType type in Enum.GetValues(typeof(DocumentType)))
+                        {
+                            <option value="@type">@type.GetDisplayName()</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">از تاریخ</label>
+                    <InputDate @bind-Value="_fromDateFilter"
+                               class="form-control"
+                               placeholder="از تاریخ" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">تا تاریخ</label>
+                    <InputDate @bind-Value="_toDateFilter"
+                               class="form-control"
+                               placeholder="تا تاریخ" />
+                </div>
+
+                <div class="col-md-12">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" @onclick="LoadDocuments" disabled="@_isLoading">
+                            @if (_isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                            }
+                            جستجو
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="ResetFilters">
+                            پاک کردن فیلترها
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- لیست داکیومنت‌ها -->
+    <div class="card">
+        <div class="card-body">
+            @if (_isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">در حال بارگذاری...</span>
+                    </div>
+                    <p class="mt-2">در حال بارگذاری اسناد...</p>
+                </div>
+            }
+            else if (_documents == null || !_documents.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-file-text display-1 text-muted"></i>
+                    <p class="mt-3">هیچ سندی یافت نشد.</p>
+                    <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
+                        ایجاد سند جدید
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>شماره سند</th>
+                                <th>تاریخ سند</th>
+                                <th>سال مالی</th>
+                                <th>شرح</th>
+                                <th>تاریخ ثبت</th>
+                                <th>وضعیت</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var document in _documents)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@document.DocumentNumber.ToString()</strong>
+                                    </td>
+                                    <td>
+                                        @ConvertToPersianDate(document.DocumentDate)
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@document.FiscalYear</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge">
+                                            @* @GetDocumentTypeBadgeClass(document.DocumentType) *@
+                                            @document.DocumentType.GetDisplayName()
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 250px;"
+                                             title="@document.Description">
+                                            @document.Description
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            @document.CreatedAt.ToString("yyyy/MM/dd HH:mm")
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary"
+                                                    @onclick="() => ViewDocument(document.Id)"
+                                                    title="مشاهده">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary"
+                                                    @onclick="() => EditDocument(document.Id)"
+                                                    title="ویرایش">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger"
+                                                    @onclick="() => DeleteDocument(document)"
+                                                    title="حذف">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- اطلاعات صفحه -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <span class="text-muted">
+                            نمایش @_documents.Count مورد از @_totalCount سند
+                        </span>
+                    </div>
+
+                    <!-- صفحه‌بندی -->
+                    @if (_totalPages > 1)
+                    {
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(_currentPage - 1)">
+                                        قبلی
+                                    </button>
+                                </li>
+
+                                @for (int i = 1; i <= _totalPages; i++)
+                                {
+                                    <li class="page-item @(i == _currentPage ? "active" : "")">
+                                        <button class="page-link" @onclick="() => ChangePage(i)">
+                                            @i
+                                        </button>
+                                    </li>
+                                }
+
+                                <li class="page-item @(_currentPage == _totalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(_currentPage + 1)">
+                                        بعدی
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal برای تایید حذف -->
+@if (_documentToDelete is not null)
+{
+    <div class="modal show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تایید حذف</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-body">
+                    <p>آیا از حذف سند شماره <strong>@_documentToDelete.DocumentNumber</strong> اطمینان دارید؟</p>
+                    <p class="text-muted">@_documentToDelete.Description</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelDelete">انصراف</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@_isDeleting">
+                        @if (_isDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+
+}

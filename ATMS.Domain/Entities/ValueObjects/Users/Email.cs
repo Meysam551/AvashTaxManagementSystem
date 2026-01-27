@@ -1,32 +1,35 @@
 ﻿
 using ATMS.Domain.Common;
-using ATMS.Shared;
+using System.Text.RegularExpressions;
 
 namespace ATMS.Domain.Entities;
 
-public class Email : ValueObject
+public sealed record Email
 {
+    private static readonly Regex EmailRegex =
+        new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+
     public string Value { get; }
 
-    private Email() { }
-
     public Email(string value)
+    {
+        Value = value;
+    }
+
+    public static Email Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("Email is required");
 
-        // ساده ولی کافی
-        if (!value.Contains("@"))
-            throw new DomainException("Invalid email");
+        value = value.Trim();
 
-        Value = value.ToLowerInvariant();
-    }
+        if (!EmailRegex.IsMatch(value))
+            throw new DomainException("Invalid email format");
 
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return Value;
+        return new Email(value.ToLowerInvariant());
     }
 
     public static implicit operator string(Email email) => email.Value;
 }
+
 

@@ -5,6 +5,7 @@ namespace ATMS.Shared.Dtos;
 
 public class DocumentCoverDto
 {
+    public Guid Id { get; set; }
     public int FiscalYear { get; set; }
     public DateOnly DocumentDate { get; set; }
     public DocumentType DocumentType { get; set; }

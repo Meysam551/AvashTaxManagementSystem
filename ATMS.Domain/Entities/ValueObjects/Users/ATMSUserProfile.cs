@@ -17,15 +17,26 @@ public class ATMSUserProfile : ValueObject
         string lastName,
         Email email)
     {
-        if (string.IsNullOrWhiteSpace(firstName))
-            throw new DomainException("First name is required");
-
-        if (string.IsNullOrWhiteSpace(lastName))
-            throw new DomainException("Last name is required");
-
         FirstName = firstName;
         LastName = lastName;
         Email = email;
+    }
+
+    public static ATMSUserProfile Create(
+    string firstName,
+    string lastName,
+    Email email)
+    {
+        if (string.IsNullOrWhiteSpace(firstName))
+            throw new DomainException("FirstName required");
+
+        if (string.IsNullOrWhiteSpace(lastName))
+            throw new DomainException("LastName required");
+
+        return new ATMSUserProfile(
+            firstName.Trim(),
+            lastName.Trim(),
+            email);
     }
 
     public ATMSUserProfile Update(
@@ -33,7 +44,7 @@ public class ATMSUserProfile : ValueObject
         string lastName,
         Email email)
     {
-        return new ATMSUserProfile(firstName, lastName, email);
+        return Create(firstName, lastName, email);
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

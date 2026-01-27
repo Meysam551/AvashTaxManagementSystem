@@ -18,7 +18,7 @@ public class IdentityRepository : IIdentityService
         _roleManager = roleManager;
     }
 
-    public async Task<ATMSUserId> CreateUserAsync(
+    public async Task<ATMSUserId> CreateAsync(
         string username,
         string password,
         string email,
@@ -37,6 +37,14 @@ public class IdentityRepository : IIdentityService
                 result.Errors.First().Description);
 
         return new ATMSUserId(user.Id);
+    }
+
+    public async Task DeleteAsync(
+    ATMSUserId userId,
+    CancellationToken ct)
+    {
+        var user = await FindUser(userId);
+        await _userManager.DeleteAsync(user);
     }
 
     public async Task UpdateEmailAsync(

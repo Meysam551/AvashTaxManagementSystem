@@ -66,7 +66,9 @@ public static class InfrastructureConfigurationServiceInstaller
         //services.AddScoped<IDocHeadRepository, DocHeadRepository>();
         //services.AddScoped<IDocItemRepository, DocItemRepository>();
         services.AddScoped<IDocumentCoverRepository, DocumentCoverRepository>();
+
         services.AddScoped<IIdentityService, IdentityRepository>();
+
         services.AddScoped<IUserRepository, ATMSUserRepository>();
 
         //services.AddScoped<IEntityTypeConfiguration<DocHead>, DocHeadConfiguration>();

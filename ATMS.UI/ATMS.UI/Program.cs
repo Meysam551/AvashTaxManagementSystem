@@ -1,4 +1,5 @@
 ﻿
+using System.Reflection.Metadata;
 using ATMS.ApplicationService;
 using ATMS.Domain.Entities;
 using ATMS.Infrastructure;
@@ -7,6 +8,7 @@ using ErrorOr;
 using MediatR;
 using MudBlazor.Services;
 using Serilog;
+
 using System.Reflection.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,9 +22,11 @@ builder.Services.AddInfrastructureServices(
     configuration: builder.Configuration
 );
 
-// ✅ MediatR
+builder.Services.AddApplicationServices();
+
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
+
 
 builder.Services.AddTransient<IRequestHandler<CreateDocumentCoverCommand, Guid>,
     CreateDocumentCoverCommandHandler>();
@@ -33,7 +37,6 @@ builder.Services.AddTransient<IRequestHandler<CreateUserCommand, ErrorOr<ATMSUse
 builder.Services.AddTransient<IRequestHandler<GetUserListQuery, ErrorOr<IEnumerable<ATMSUserDto>>>,
     GetUserListQueryHandler>();
 
-// ✅ AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
 builder.Services.AddMudServices();
