@@ -15,6 +15,9 @@
     <Folder Include="Accountings\Events\" />
     <Folder Include="Accountings\Queries\" />
     <Folder Include="ATMSUsers\Behaviors\" />
+    <Folder Include="CostCenter\Commands\" />
+    <Folder Include="CostCenter\Filters\" />
+    <Folder Include="CostCenter\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
